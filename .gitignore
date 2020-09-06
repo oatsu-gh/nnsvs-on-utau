@@ -1,1 +1,4 @@
 *.pdf
+*.xlsx
+__pycache__
+test
