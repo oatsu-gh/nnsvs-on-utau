@@ -50,6 +50,7 @@ class FullLabelList(list):
     """
     HTSのフルコンテキストラベル全体を扱うクラス
     """
+
     def __str__(self):
         l = [str(full_label) for full_label in self]
         return '\n'.join(l)
@@ -113,7 +114,7 @@ class FullLabelList(list):
         登録元: e
         登録先: d, f
         eは長いけれど、すべて取得してdとfに渡す。
-        # NOTE: 前の音素じゃなくて前のノートの情報なことに注意（Phoneme単位で扱っちゃダメ）
+        # NOTE: 前の音素じゃなくて前のノートの情報なことに注意（PhonemeContext単位で扱っちゃダメ）
         """
         for i, current_label in enumerate(self[1:-1], 1):
             current_note = current_label.note
@@ -141,17 +142,20 @@ class FullLabel:
     def __init__(self):
         self.start = 0
         self.end = 0
-        self._p = Phoneme()   # 一昨日から明後日までの音素(p1-p16)
-        self._a = Syllable()  # 昨日の音節(a1-a5)
-        self._b = Syllable()  # 今日の音節(b1-b5)
-        self._c = Syllable()  # 明日の音節(c1-c5)
-        self._d = Note()  # 昨日のノートのピッチ、音高、拍数、テンポ、長さ(d1-d9)
-        self._e = Note()  # 今日のノートのピッチ、音高、拍数、テンポ、長さ、ほか音楽記号(e1-e50)
-        self._f = Note()  # 明日のノートのピッチ、音高、拍数、テンポ、長さ(f1-f9)
-        self._g = Phrase()  # 昨日のフレーズの音節数と音素数(g1-g2)
-        self._h = Phrase()  # 今日のフレーズの音節数と音素数(h1-h2)
-        self._i = Phrase()  # 明日のフレーズの音節数と音素数(i1-i2)
-        self._j = Song()  # 曲全体の(音節あるいは小節数)、音素数、フレーズ数(j1-j3)
+        self._p = PhonemeContext()   # 一昨日から明後日までの音素(p1-p16)
+        syllable = SyllableContext()
+        self._a = syllable[0]  # 昨日の音節(a1-a5)
+        self._b = syllable[1]  # 今日の音節(b1-b5)
+        self._c = syllable[2]  # 明日の音節(c1-c5)
+        note = NoteContext()
+        self._d = note[0]  # 昨日のノートのピッチ、音高、拍数、テンポ、長さ(d1-d9)
+        self._e = note[1]  # 今日のノートのピッチ、音高、拍数、テンポ、長さ、ほか音楽記号(e1-e50)
+        self._f = note[2]  # 明日のノートのピッチ、音高、拍数、テンポ、長さ(f1-f9)
+        phrase = PhraseContext()
+        self._g = phrase[0]  # 昨日のフレーズの音節数と音素数(g1-g2)
+        self._h = phrase[1]  # 今日のフレーズの音節数と音素数(h1-h2)
+        self._i = phrase[2]  # 明日のフレーズの音節数と音素数(i1-i2)
+        self._j = SongContext()  # 曲全体の(音節あるいは小節数)、音素数、フレーズ数(j1-j3)
 
     def __str__(self):
         str_time = f'{self.start} {self.end} '
@@ -184,28 +188,9 @@ class FullLabel:
 
     @phoneme.setter
     def phoneme(self, phoneme_object):
-        """
-        現在の音素を上書きする。
-        """
-        if not isinstance(phoneme_object, Phoneme):
+        if not isinstance(phoneme_object, PhonemeContext):
             raise TypeError
         self._p = phoneme_object
-
-    @property
-    def previous_syllable(self):
-        """
-        直前の音節を取得する。
-        """
-        return self._a
-
-    @previous_syllable.setter
-    def previous_syllable(self, syllable_object):
-        """
-        現在の音節を上書きする。
-        """
-        if not isinstance(syllable_object, Syllable):
-            raise TypeError
-        self._a = syllable_object
 
     @property
     def syllable(self):
@@ -216,44 +201,9 @@ class FullLabel:
 
     @syllable.setter
     def syllable(self, syllable_object):
-        """
-        現在の音節を上書きする。
-        """
-        if not isinstance(syllable_object, Syllable):
+        if not isinstance(syllable_object, SyllableContext):
             raise TypeError
         self._b = syllable_object
-
-    @property
-    def next_syllable(self):
-        """
-        直前の音節を取得する。
-        """
-        return self._c
-
-    @next_syllable.setter
-    def next_syllable(self, syllable_object):
-        """
-        現在の音節を上書きする。
-        """
-        if not isinstance(syllable_object, Syllable):
-            raise TypeError
-        self._c = syllable_object
-
-    @property
-    def previous_note(self):
-        """
-        直前のノートを取得する。
-        """
-        return self._d
-
-    @previous_note.setter
-    def previous_note(self, note_object):
-        """
-        現在のノートを上書きする。
-        """
-        if not isinstance(note_object, Note):
-            raise TypeError
-        self._d = note_object
 
     @property
     def note(self):
@@ -264,44 +214,9 @@ class FullLabel:
 
     @note.setter
     def note(self, note_object):
-        """
-        現在のノートを上書きする。
-        """
-        if not isinstance(note_object, Note):
+        if not isinstance(note_object, NoteContext):
             raise TypeError
         self._e = note_object
-
-    @property
-    def next_note(self):
-        """
-        直前のノートを取得する。
-        """
-        return self._f
-
-    @next_note.setter
-    def next_note(self, note_object):
-        """
-        現在のノートを上書きする。
-        """
-        if not isinstance(note_object, Note):
-            raise TypeError
-        self._f = note_object
-
-    @property
-    def previous_phrase(self):
-        """
-        直前の音節を取得する。
-        """
-        return self._g
-
-    @previous_phrase.setter
-    def previous_phrase(self, phrase_object):
-        """
-        現在の音節を上書きする。
-        """
-        if not isinstance(phrase_object, Phrase):
-            raise TypeError
-        self._g = phrase_object
 
     @property
     def phrase(self):
@@ -312,31 +227,12 @@ class FullLabel:
 
     @phrase.setter
     def phrase(self, phrase_object):
-        """
-        現在の音節を上書きする。
-        """
-        if not isinstance(phrase_object, Phrase):
+        if not isinstance(phrase_object, PhraseContext):
             raise TypeError
         self._h = phrase_object
 
-    @property
-    def next_phrase(self):
-        """
-        直前の音節を取得する。
-        """
-        return self._i
 
-    @next_phrase.setter
-    def next_phrase(self, phrase_object):
-        """
-        現在の音節を上書きする。
-        """
-        if not isinstance(phrase_object, Phrase):
-            raise TypeError('Functional argument \'phrase_object\' must be Phrase instance.')
-        self._i = phrase_object
-
-
-class Phoneme(list):
+class PhonemeContext(list):
     """
     1音素を扱うクラス
     p1~p16
@@ -352,7 +248,6 @@ class Phoneme(list):
 
     @category.setter
     def category(self, phonetic_category):
-        """現在の音素記号の分類(p1)を上書きする。"""
         self[0] = phonetic_category
 
     @property
@@ -362,7 +257,6 @@ class Phoneme(list):
 
     @symbol.setter
     def symbol(self, phonetic_symbol):
-        """現在の音素記号を上書きする"""
         self[3] = phonetic_symbol
 
     @property
@@ -372,7 +266,6 @@ class Phoneme(list):
 
     @flag.setter
     def flag(self, flag):
-        """現在の音素記号(p8)を上書きする"""
         self[8] = flag
 
     @property
@@ -390,15 +283,6 @@ class Phoneme(list):
 
     @position.setter
     def position(self, list_of_position):
-        """
-        現在の音素が、音節内の
-        前から何番目か (p12) と 後ろから何番目か (p13) を上書きする。
-        日本語だったら
-        V  のとき : [1, 1]
-        CV のとき : [1, 2] [2, 1]
-        CVVのとき : [1, 3] [2, 2] [3, 3]
-        pauなど   : [1, 1]
-        """
         self[11], self[12] = list_of_position
 
     @property
@@ -411,30 +295,22 @@ class Phoneme(list):
         return [self[13], self[14]]
 
     @distance.setter
-    def distance(self, list_of_position):
-        """
-        現在の音素が、音節内の
-        [直前の母音からの距離 (p14), 直後の子音までの距離 (p15)]
-        を上書きする。
-        """
-        self[13], self[14] = list_of_position
+    def distance(self, list_of_distance):
+        self[13], self[14] = list_of_distance
 
     @property
-    def undefined_context(self):
+    def undefined(self):
         """
         HTSでは定義されていない、空きのコンテキスト情報を取得する。(p16)
         """
         return self[15]
 
-    @undefined_context.setter
-    def undefined_context(self, user_context):
-        """
-        HTSでは定義されていない、空きのコンテキスト情報を上書きする。(p16)
-        """
+    @undefined.setter
+    def undefined(self, user_context):
         self[15] = user_context
 
 
-class Syllable(list):
+class SyllableContext(list):
     """
     1音節を扱うクラス
     昨日の音節 A (a1~a5)
@@ -444,10 +320,49 @@ class Syllable(list):
     """
 
     def __init__(self):
-        super().__init__(['xx'] * 5)
+        super().__init__([['xx'] * 5, ['xx'] * 5, ['xx'] * 5])
+
+    @property
+    def number(self):
+        """音節内の音素数"""
+        return self[1][0]
+
+    @number.setter
+    def number(self, number_of_phonemes):
+        self[1][0] = number_of_phonemes
+
+    @property
+    def position(self):
+        """ノート内での位置"""
+        return [self[1][1], self[1][2]]
+
+    @position.setter
+    def position(self, list_of_position):
+        self[1][1], self[1][2] = list_of_position
+
+    @property
+    def language(self):
+        """音節の言語"""
+        return self[1][3]
+
+    @language.setter
+    def language(self, language):
+        self[1][3] = language
+
+    @property
+    def language_context(self):
+        """
+        音節の言語依存コンテキスト
+        0らしいけどよくわからん。個数か？
+        """
+        return self[1][4]
+
+    @language_context.setter
+    def language_context(self, language_dependent_context):
+        self[1][4] = language_dependent_context
 
 
-class Note(list):
+class NoteContext(list):
     """
     1ノート（音符と休符）を扱うクラス
     昨日のノート D (d1~d5)
@@ -457,10 +372,10 @@ class Note(list):
     """
 
     def __init__(self):
-        super().__init__(['xx'] * 60)
+        super().__init__([['xx'] * 9, ['xx'] * 60, ['xx'] * 9])
 
 
-class Phrase(list):
+class PhraseContext(list):
     """
     1フレーズ（基準がわからん）を扱うクラス
     昨日のフレーズ G (g1~g2)
@@ -470,10 +385,10 @@ class Phrase(list):
     """
 
     def __init__(self):
-        super().__init__(['xx'] * 2)
+        super().__init__([['xx'] * 2, ['xx'] * 2, ['xx'] * 2])
 
 
-class Song(list):
+class SongContext(list):
     """
     1曲を扱うクラス
     今日の曲(j1-j3)
