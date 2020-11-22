@@ -26,6 +26,7 @@ Musicオブジェクトを経由せずにOneLineオブジェクトを直接生�
 from os.path import basename, splitext
 
 import utaupy as up
+from hts2json import hts2json
 
 
 def language_independent_phoneme_identity(phoneme):
@@ -62,8 +63,7 @@ def convert_ustobj_to_htsfulllabelobj(ust: up.ust.Ust, d_table: dict) -> up.hts.
             ol = up.hts.OneLine()
             # 時刻の処理
             ol.start = int(t_start)
-            # ノート内最終音素以外は発声時間が0
-            ol.end = int(t_end) if len(phonemes) - idx - 1 == 0 else int(t_start)
+            ol.end = int(t_end)
             # oneline.p: 音素の処理-------------
             tmp_p = ol.p
             # 音素分類
@@ -109,12 +109,21 @@ def main():
     d_table = up.table.load(path_table, encoding='sjis')
 
     path_ust = input('path_ust: ').strip('"')
-    path_hts = splitext(basename(path_ust))[0] + '.lab'
+    path_hts = splitext(basename(path_ust))[0] + '_ust2hts.lab'
+    path_json = splitext(basename(path_ust))[0] + '_ust2hts.json'
     ust = up.ust.load(path_ust)
 
+    # Ust → HTSFullLabel
     full_label = convert_ustobj_to_htsfulllabelobj(ust, d_table)
-    full_label.fill_phonemes()
+    # HTSFullLabel中の重複データを削除して整理
+    full_label.generate_songobj()
+    full_label.fill_contexts_from_songobj()
+    # 音素数などの整合性をチェック
+    full_label.song.check()
+    # ファイル出力
     full_label.write(path_hts)
+    hts2json(path_hts, path_json)
+
     input('press enter')
 
 
