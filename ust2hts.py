@@ -58,51 +58,6 @@ def convert_ustobj_to_htsfulllabelobj(ust: up.ust.Ust, d_table: dict) -> up.hts.
     for note in ust.notes:
         t_end = t_start + (note.length_ms * 10000)
         phonemes = d_table[note.lyric]
-    #     # 単音素のとき
-    #     if len(phonemes) == 1:
-    #         phoneme = phonemes[0]
-    #         ol = up.hts.OneLine()
-    #         # 時刻の処理
-    #         ol.start = int(t_start)
-    #         ol.end = int(t_end)
-    #         # oneline.p: 音素の処理-------------
-    #         tmp_p = ol.p
-    #         # 音素分類
-    #         tmp_p[0] = language_independent_phoneme_identity(phoneme)
-    #         # 音素記号
-    #         tmp_p[3] = phoneme
-    #         # 音素の音節内位置
-    #         tmp_p[11] = 1
-    #         tmp_p[12] = 1
-    #         tmp_p[13] = 'xx'
-    #         tmp_p[14] = 'xx'
-    #         ol.p = tmp_p
-    #         # oneline.b: 音節の処理-------------
-    #         # 音節内音素数
-    #         ol.b[0] = 1
-    #         # ノート内音節位置
-    #         ol.b[1] = 1
-    #         ol.b[2] = 1
-    #         # oneline.e: ノートの処理-----------
-    #         if not phoneme in ('pau', 'sil'):
-    #             # 音程C0-G9
-    #             ol.e[0] = up.ust.notenum_as_abc(note.notenum)
-    #             # relative pitch
-    #             ol.e[1] = (note.notenum - key_of_the_note) % 12
-    #             # key
-    #             ol.e[2] = key_of_the_note
-    #         # テンポ
-    #         ol.e[4] = int(note.tempo)
-    #         # ノート内音節数
-    #         ol.e[5] = 1
-    #         # ノート長(0.01s)
-    #         ol.e[6] = note.length_ms // 10
-    #         # ノート長(32分音符の1/3, つまり96分音符いくつぶんか, 4分音符なら8*3=24)
-    #         # utaupy.ust.Note.length は4分音符で480なので、20で割ればよい。
-    #         ol.e[7] = note.length // 20
-    #         # フルラベルに追加
-    #         full_label.append(ol)
-
         for idx, phoneme in enumerate(phonemes):
             ol = up.hts.OneLine()
             # 時刻の処理
@@ -150,7 +105,7 @@ def convert_ustobj_to_htsfulllabelobj(ust: up.ust.Ust, d_table: dict) -> up.hts.
 
 
 def main():
-    path_table = 'dic/kana2romaji_sjis_for_oto2lab.table'
+    path_table = 'dic/kana2romaji_utf-8_for_oto2lab .table'
     d_table = up.table.load(path_table, encoding='sjis')
 
     path_ust = input('path_ust: ').strip('"')
