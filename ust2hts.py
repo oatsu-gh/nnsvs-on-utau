@@ -65,17 +65,17 @@ def convert_ustobj_to_htsfulllabelobj(ust: up.ust.Ust, d_table: dict) -> up.hts.
             ol.start = int(t_start)
             ol.end = int(t_end)
             # oneline.p: 音素の処理-------------
-            tmp_p = ol.p
+            temp_p = ol.p
             # 音素分類
-            tmp_p[0] = language_independent_phoneme_identity(phoneme)
+            temp_p[0] = language_independent_phoneme_identity(phoneme)
             # 音素記号
-            tmp_p[3] = phoneme
+            temp_p[3] = phoneme
             # 音素の音節内位置
-            tmp_p[11] = idx + 1
-            tmp_p[12] = len(phonemes) - idx
-            tmp_p[13] = 'xx'
-            tmp_p[14] = 'xx' if idx == 0 else len(phonemes) - idx - 1
-            ol.p = tmp_p
+            temp_p[11] = idx + 1
+            temp_p[12] = len(phonemes) - idx
+            temp_p[13] = 'xx'
+            temp_p[14] = 'xx' if idx == 0 else len(phonemes) - idx - 1
+            ol.p = temp_p
             # oneline.b: 音節の処理-------------
             # 音節内音素数
             ol.b[0] = len(phonemes)
@@ -124,8 +124,8 @@ def main():
     full_label.write(path_hts)
     hts2json(path_hts, path_json)
 
-    input('press enter')
 
 
 if __name__ == '__main__':
     main()
+    input('press enter')
