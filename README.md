@@ -2,6 +2,8 @@
 
 Run nnsvs as UTAU plugin.
 
+**nnsvs-on-utau is now [ENUNU](https://github.com/oatsu-gh/enunu).**
+
 ## 計画
 
 - UST → LAB (HTS-full-context-label) をしたい。
